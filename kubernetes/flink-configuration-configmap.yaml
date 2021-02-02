@@ -1,12 +1,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: flink-config
+  name: flink-consume-produce-ek-config
+  namespace: flink-consume-produce-ek
   labels:
-    app: flink
+    app: flink-consume-produce-ek
 data:
   flink-conf.yaml: |+
-    jobmanager.rpc.address: flink-consume-produce-jobmanager
+    jobmanager.rpc.address: flink-consume-produce-ek-jobmanager
     taskmanager.numberOfTaskSlots: 2
     blob.server.port: 6124
     jobmanager.rpc.port: 6123
@@ -60,3 +61,11 @@ data:
     # Suppress the irrelevant (wrong) warnings from the Netty channel handler
     logger.netty.name = org.apache.flink.shaded.akka.org.jboss.netty.channel.DefaultChannelPipeline
     logger.netty.level = OFF
+  consumer.config : |+
+    bootstrap.servers=  <fill-in>
+    group.id=flink-consume-produce-ek
+    request.timeout.ms=60000
+
+    sasl.mechanism=PLAIN
+    security.protocol=SASL_SSL
+    sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="<< flin-in >>";

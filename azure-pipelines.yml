@@ -1,0 +1,51 @@
+# Docker
+# Build a Docker image 
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+#Author : Ejaskhan
+
+trigger:
+- master
+
+resources:
+- repo: self
+
+variables:
+  tag: '$(Build.BuildId)'
+
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: MavenAuthenticate@0
+      displayName: 'Maven Authenticate'
+      inputs:
+        artifactsFeeds: 'flink-consume-produce-ek'
+    - bash: |
+        echo "pipeline variable 'docker.registry.url' was not set but is required."
+        exit 1
+      condition: eq(variables['docker.registry.url'], '')
+    - bash: |
+        echo "pipeline variable 'docker.registry.username' was not set but is required."
+        exit 1
+      condition: eq(variables['docker.registry.username'], '')
+    - bash: |
+        echo "pipeline variable 'docker.registry.password' was not set but is required."
+        exit 1
+      condition: eq(variables['docker.registry.password'], '')
+    - bash: |
+        docker login ${DOCKER_REGISTRY_URL} -u ${DOCKER_REGISTRY_USERNAME} -p ${DOCKER_REGISTRY_PASSWORD}
+      name: DockerLogin
+      env:
+        DOCKER_REGISTRY_PASSWORD: $(docker.registry.password)
+    - bash: |
+        docker build ${BUILD_SOURCESDIRECTORY} \
+        -t ${DOCKER_REGISTRY_URL}/${BUILD_REPOSITORY_NAME}:${VERSION}
+      name: DockerBuild
+    - bash: |
+        docker push ${DOCKER_REGISTRY_URL}/${BUILD_REPOSITORY_NAME}:${VERSION}
+      name: DockerPush
