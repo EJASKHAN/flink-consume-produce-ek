@@ -22,7 +22,7 @@ spec:
           image: <<fill-in>> #docker repository
           imagePullPolicy: Always
           env:
-          args: ["standalone-job", "--job-classname", "com.mbrdi.app.FlinkTestConsumerProducer"]
+          args: ["standalone-job", "--job-classname", "com.flink.app.FlinkTestConsumerProducer"]
           ports:
             - containerPort: 6123
               name: rpc
